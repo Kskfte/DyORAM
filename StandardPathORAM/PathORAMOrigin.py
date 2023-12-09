@@ -4,7 +4,7 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Random import get_random_bytes
 from utils import findSharedLevel
 from utils import update_loading_bar
-
+import time
 
 """
 An element = (key, value) = (int, 16-byte)
@@ -16,7 +16,7 @@ class PathORAM:
     def __init__(self, N) -> None:
         self.N = N # InitSize
         self.M = N # CurrentSize
-        self.Z = 4
+        self.Z = 2
         """
         Storing in Client
         """
@@ -180,14 +180,16 @@ class PathORAM:
 
 
 if __name__=="__main__":
-    N = 2**20
+    N = 2**10
     elementList = []
     for i in range(N):
         elementList.append((i+1,get_random_bytes(16)))
     pORAM = PathORAM(N)
     pORAM.initialization(elementList)
-    accessTimes = N
+    accessTimes = 2**10
     opS = ["read","write"]
+
+    beginTime = time.time()
     for i in range(accessTimes):
         modV = get_random_bytes(16)
         searchInd = random.randint(0,N-1)
@@ -197,8 +199,9 @@ if __name__=="__main__":
             elementList[searchInd] = (elementList[searchInd][0],modV)
         if i%1000==0:
             update_loading_bar(i/accessTimes)
-
-    print("\nPosition map consumes {} KB".format(pORAM.posMapStorageInKB))
+    endTime = time.time()
+    print("\nTime consumes {} ms".format(1000*(endTime-beginTime)/accessTimes))
+    print("Position map consumes {} KB".format(pORAM.posMapStorageInKB))
     print("Stash consumes {} KB".format(pORAM.stashStorageInKB))
     print("Bandwidth is {} KB".format(pORAM.bandwidthInKB))
 
